@@ -1,1 +1,7 @@
-run 
+run startup.sql file in your local mysql database
+and run the follwing :
+
+1. npm docker compose up
+2. npm run producer
+3. npm run consumer
+

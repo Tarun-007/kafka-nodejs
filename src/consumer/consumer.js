@@ -1,5 +1,4 @@
 const { Kafka } = require('kafkajs')
-const { SingleEntryPlugin } = require('webpack')
 const config = require('../config')
 const { saveMessageToTables } = require('./mysql')
 

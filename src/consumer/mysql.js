@@ -25,6 +25,7 @@ saveMessageToTables = async (message, offset = 0) => {
   } catch (error) {
     console.log('error occured in the transaction');
     db.rollback(connection)
+    throw Error("error occurred in completing transaction");
   }
 };
 

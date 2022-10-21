@@ -1,6 +1,6 @@
 const { Kafka } = require('kafkajs')
 const config = require('../config')
-const { saveMessageToTables } = require('./mysql')
+const { saveMessageToTables, fetchLatestOffset } = require('./mysql')
 
 const kafka = new Kafka({
   clientId: config.kafka.CLIENTID,
@@ -18,7 +18,9 @@ const producer = kafka.producer()
 
 const run = async () => {
   await consumer.connect()
-  await consumer.subscribe({ topic:topic1, fromBeginning: false })
+  await consumer.subscribe({ topic:topic1, fromBeginning: true })
+  let latestOffset = fetchLatestOffset();
+  consumer.seek({ topic: topic1, partition: 0, offset: latestOffset })
   await consumer.run({
     autoCommit: false,
     eachMessage: async ({ message }) => {
@@ -26,7 +28,8 @@ const run = async () => {
         let{offset, key, value} = message;
         console.log('recieved message ', {offset, key:key.toString(), value:value.toString()})
         const jsonObj = JSON.parse(value.toString());
-        await saveMessageToTables(jsonObj, offset); 
+        await saveMessageToTables(jsonObj, offset);
+        //throw new Error("hey this is an error");
         await sendMessage(producer, topic2, jsonObj);
         setTimeout(async ()=>{
           console.log(`commiting offset ${offset}`)

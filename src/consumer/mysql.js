@@ -29,7 +29,15 @@ saveMessageToTables = async (message, offset = 0) => {
   }
 };
 
+fetchLatestOffset() = async () =>{
+  let getStatement = ` select offset from messages_table_1 order by created_at desc limit 1`;
+  let resp = db.query(connection, getStatement);
+  console.log(resp);
+
+}
+
 module.exports ={
-    saveMessageToTables
+    saveMessageToTables,
+    fetchLatestOffset
 }
 

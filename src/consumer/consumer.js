@@ -47,7 +47,7 @@ const run = async () => {
 
   //producer
   await producer.connect();
-  // const producerTransaction = await producer.transaction();
+  
   
   //db connection
   let dbConnection = getConnection();
@@ -58,6 +58,7 @@ const run = async () => {
     eachMessage: async ({ topic, message, pause }) => {
 
       db.beginTransaction(dbConnection);
+      const producerTransaction = await producer.transaction();
       try {
         let { offset, key, value } = message;
         console.log(`recieved message  at ${new Date().getSeconds()}`, {
@@ -79,7 +80,7 @@ const run = async () => {
         const jsonObj = JSON.parse(value.toString());
         await saveMessageToTables(jsonObj, offset);
 
-        await sendMessage(producer, topic2, jsonObj);
+        await sendMessage(producerTransaction, topic2, jsonObj);
 
         //consumer commit offset
         await commitOffset(offset);
@@ -88,15 +89,15 @@ const run = async () => {
         await db.commit(dbConnection);
 
         //producer commit sendMessage
-        //await producerTransaction.commit();
+        await producerTransaction.commit();
       } catch (error) {
-        // producer transaction abort
         console.log(
           `error occured, rolling back transaction ${error.message} \n`
         );
         await db.rollback(dbConnection);
+        // producer transaction abort
+        await producerTransaction.abort();
         consumer.seek({ topic: topic1, partition: 0, offset: error.message });
-        // await producerTransaction.abort();
       }
 
       const resumeThisPartition = pause();

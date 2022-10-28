@@ -29,7 +29,7 @@ const sendMessage = async (producer, topic) => {
     if (++times == 10) {
       clearInterval(intervalId);
     }
-  }, 10000);
+  }, 2000);
 };
 
 sendMessage(producer, topic1)

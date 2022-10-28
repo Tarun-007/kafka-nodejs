@@ -47,7 +47,6 @@ const run = async () => {
 
   //producer
   await producer.connect();
-  // const producerTransaction = await producer.transaction();
   
   //db connection
   let dbConnection = getConnection();
@@ -87,16 +86,12 @@ const run = async () => {
         //db commit insert
         await db.commit(dbConnection);
 
-        //producer commit sendMessage
-        //await producerTransaction.commit();
       } catch (error) {
-        // producer transaction abort
         console.log(
           `error occured, rolling back transaction ${error.message} \n`
         );
         await db.rollback(dbConnection);
         consumer.seek({ topic: topic1, partition: 0, offset: error.message });
-        // await producerTransaction.abort();
       }
 
       const resumeThisPartition = pause();
